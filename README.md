@@ -169,8 +169,6 @@ INSTABOX_API_KEY=ibk_... node scripts/live-test.mjs dist/index.js <phase>
 | `existing` | Non-destructive checks (exec, files, metrics, usage, secrets, delete-guard) on `MACHINE_ID`. |
 | `existing-write` | Adds reversible writes on `MACHINE_ID`: a temp file, a port publish / unpublish, an SSH token, suspend / resume. |
 
-Status against the live API: `read`, `existing` and `existing-write` pass. `lifecycle` (create, stop / start, delete with the correct confirmation), snapshots, `instabox_update_machine` and the `since` / `from` / `to` parameters of the metrics and usage tools are implemented from the API documentation but not yet exercised live.
-
 ## Not covered
 
 Desktop/VNC control, SSH certificates (`/connections`), Vault items, file upload URLs and org/billing management are not exposed. Everything inside a machine can still be done with `instabox_exec`.
