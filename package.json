@@ -1,0 +1,53 @@
+{
+  "name": "instabox-mcp",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for InstaBox: create cloud Linux machines, run commands, manage files, snapshots, ports and SSH from any MCP client.",
+  "type": "module",
+  "bin": {
+    "instabox-mcp": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('dist/index.js', 0o755)\"",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "inspect": "npx @modelcontextprotocol/inspector node dist/index.js",
+    "live-test": "node scripts/live-test.mjs dist/index.js read"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.6.0"
+  },
+  "license": "MIT",
+  "author": "syrex1013",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/syrex1013/instabox-mcp.git"
+  },
+  "homepage": "https://github.com/syrex1013/instabox-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/syrex1013/instabox-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "instabox",
+    "sandbox",
+    "ai-agents",
+    "claude",
+    "codex",
+    "cloud-vm"
+  ]
+}
