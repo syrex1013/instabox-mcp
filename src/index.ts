@@ -808,6 +808,108 @@ tool(
 );
 
 // ---------------------------------------------------------------------------
+// Prompts (slash commands in clients that support MCP prompts, e.g. /mcp__instabox__status)
+// ---------------------------------------------------------------------------
+
+function prompt<S extends z.ZodRawShape>(
+  name: string,
+  cfg: { title: string; description: string; argsSchema?: S },
+  text: (args: z.objectOutputType<S, z.ZodTypeAny>) => string,
+) {
+  server.registerPrompt(
+    name,
+    { title: cfg.title, description: cfg.description, argsSchema: cfg.argsSchema as any },
+    ((args: any) => ({
+      messages: [{ role: "user" as const, content: { type: "text" as const, text: text(args ?? {}) } }],
+    })) as any,
+  );
+}
+
+prompt(
+  "status",
+  { title: "InstaBox status", description: "Summarise the account, limits, machines, snapshots and public ports." },
+  () =>
+    "Use the InstaBox tools to give me a short status report: who I am (instabox_whoami), usage against plan limits (instabox_get_usage), every machine with its state, template and labels (instabox_list_machines), snapshots (instabox_list_snapshots) and published ports (instabox_list_ports). Finish with anything that looks wrong or close to a limit. Change nothing.",
+);
+
+prompt(
+  "run",
+  {
+    title: "Run a command",
+    description: "Run a shell command on a machine and show the result.",
+    argsSchema: {
+      machine: z.string().describe("Machine ID or name"),
+      command: z.string().describe("Shell command to run"),
+    },
+  },
+  ({ machine, command }) =>
+    `Run this shell command on InstaBox machine "${machine}" with instabox_exec (cmd, not argv) and show stdout, stderr and the exit code. If the machine is not running, tell me instead of starting it.\n\nCommand:\n${command}`,
+);
+
+prompt(
+  "new-sandbox",
+  {
+    title: "New throwaway sandbox",
+    description: "Create a short-lived machine, optionally run a setup command, and report how to use it.",
+    argsSchema: {
+      name: z.string().optional().describe("Machine name (default: random)"),
+      template: z.string().optional().describe("Template ID (default: agent-browser)"),
+      lifetime_minutes: z.string().optional().describe("Auto-delete after this many minutes (default 60, max 1440)"),
+      setup: z.string().optional().describe("Shell command to run once the machine is up"),
+    },
+  },
+  ({ name, template, lifetime_minutes, setup }) => {
+    const mins = Math.min(1440, Math.max(1, Number(lifetime_minutes) || 60));
+    return [
+      "Check instabox_get_usage first; if I am at my machine limit, stop and tell me which machine is in the way instead of deleting anything.",
+      `Otherwise create a machine with instabox_create_machine${name ? ` named "${name}"` : ""}${template ? `, templateId "${template}"` : ""}, deleteAfterSeconds ${mins * 60}.`,
+      setup ? `Then run this with instabox_exec and show the output:\n${setup}` : "",
+      `Finish with the machine ID, state and when it will be deleted (${mins} minutes).`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  },
+);
+
+prompt(
+  "expose",
+  {
+    title: "Publish a port",
+    description: "Publish a machine port as a public HTTPS URL and check something is listening.",
+    argsSchema: {
+      machine: z.string().describe("Machine ID or name"),
+      port: z.string().describe("Port number (1024-65535)"),
+    },
+  },
+  ({ machine, port }) =>
+    `On InstaBox machine "${machine}", first check with instabox_exec (for example \`ss -ltn\`) that something listens on port ${port}. If nothing does, say so and ask before publishing. Otherwise publish it with instabox_publish_port and give me the URL. Remind me that the URL is public until unpublished.`,
+);
+
+prompt(
+  "backup",
+  {
+    title: "Snapshot a machine",
+    description: "Save a machine as a snapshot and wait until it is ready.",
+    argsSchema: {
+      machine: z.string().describe("Machine ID or name"),
+      name: z.string().optional().describe("Snapshot name (default: <machine>-backup)"),
+    },
+  },
+  ({ machine, name }) =>
+    `Check instabox_get_usage for snapshot limits, then save InstaBox machine "${machine}" as a snapshot named "${name || `${machine}-backup`}" with instabox_create_snapshot (wait for it). If a snapshot with that name exists or I am at the limit, stop and tell me. Report the snapshot ID and status.`,
+);
+
+prompt(
+  "cleanup",
+  {
+    title: "Find machines to clean up",
+    description: "List machines and snapshots that look unused and propose what to delete (never deletes without asking).",
+  },
+  () =>
+    "List my InstaBox machines (with instabox_list_machines and instabox_get_machine_usage for each) and snapshots. Identify what looks idle, stopped or forgotten, and propose what to delete or stop. Do NOT delete or stop anything: present the list with IDs and wait for me to confirm each item.",
+);
+
+// ---------------------------------------------------------------------------
 // Start
 // ---------------------------------------------------------------------------
 

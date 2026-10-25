@@ -4,7 +4,7 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
 [![MCP](https://img.shields.io/badge/MCP-server-8A2BE2.svg)](https://modelcontextprotocol.io)
 
-A [Model Context Protocol](https://modelcontextprotocol.io) server for [InstaBox](https://instabox.sh): disposable cloud Linux machines for AI agents. It wraps the InstaBox REST API (`https://api.instabox.sh`) in 30 tools, so any MCP client (Claude, Codex, Antigravity, oh-my-pi, Cursor, ...) can create a machine, run commands and edit files in it, snapshot it, expose a port and delete it again.
+A [Model Context Protocol](https://modelcontextprotocol.io) server for [InstaBox](https://instabox.sh): disposable cloud Linux machines for AI agents. It wraps the InstaBox REST API (`https://api.instabox.sh`) in 30 tools and 6 slash-command prompts, so any MCP client (Claude, Codex, Antigravity, oh-my-pi, Cursor, ...) can create a machine, run commands and edit files in it, snapshot it, expose a port and delete it again.
 
 > **Unofficial.** This project is not affiliated with or endorsed by InstaBox.
 
@@ -138,6 +138,19 @@ Config files are plain text. Keep them out of version control and use a restrict
 | Org Secrets | `instabox_list_org_secrets`, `instabox_get_machine_secrets`, `instabox_update_machine_secrets`, `instabox_refresh_machine_secrets` |
 
 Example prompts: *"Create a machine, clone this repo into it and run the tests"*, *"Snapshot my dev machine, then start a fresh one from the snapshot"*, *"Publish port 3000 on dev and give me the URL"*.
+
+## Slash commands (prompts)
+
+Clients that support MCP prompts expose these as commands. In Claude Code they appear as `/mcp__instabox__<name>`.
+
+| Command | Arguments | What it does |
+|---|---|---|
+| `status` | none | Account, limits, machines, snapshots and ports, with anything that looks wrong |
+| `run` | `machine`, `command` | Run a shell command on a machine and show stdout, stderr and exit code |
+| `new-sandbox` | `name`, `template`, `lifetime_minutes`, `setup` (all optional) | Create a self-deleting machine and optionally run a setup command |
+| `expose` | `machine`, `port` | Check something listens, then publish the port as a public URL |
+| `backup` | `machine`, `name` (optional) | Snapshot a machine and wait until it is ready |
+| `cleanup` | none | List idle machines and snapshots and propose deletions, without deleting anything |
 
 ## How it behaves
 
