@@ -196,3 +196,5 @@ npm run inspect   # open the server in the MCP Inspector
 ## License
 
 [MIT](LICENSE)
+
+[![M8ven Verified](https://m8ven.ai/badge/mcp/syrex1013-instabox-mcp-d6fexi?variant=verified&v=efcd8d2bae178c4b675b9f460fcfc073)](https://m8ven.ai/mcp/syrex1013-instabox-mcp-d6fexi?s=readme)
